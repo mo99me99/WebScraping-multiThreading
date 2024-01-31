@@ -1,6 +1,7 @@
 import requests
 import os.path
 from bs4 import BeautifulSoup
+import csv
 
 save_dir = './images/'
 if not os.path.exists(save_dir):
@@ -13,30 +14,54 @@ headers = {
 }
 
 
-    
+info = []
     
         
 
 def download_images(images, count) : 
+    count = count*2
     i = 0
-    count *= 2
     for image in images: 
-            try:
-                image_url = image.get('src')
-                print(image_url)
-                image_data = requests.get(image_url).content
-                image_filename = os.path.join(save_dir, image_url.split('/')[-1])
-                with open(image_filename, 'wb') as img_file:
-                    img_file.write(image_data)
-                print(f"Image downloaded: {image_filename}")
+        i +=1
+        if i%2 ==1 : 
+            continue
+        try:
+            image_url = image.get('src')
+            # print(image_url)
+            image_data = requests.get(image_url).content
+            image_filename = os.path.join(save_dir, image_url.split('/')[-1])
+            with open(image_filename, 'wb') as img_file:
+                img_file.write(image_data)
+            # print(f"Image downloaded: {image_filename}")
 
-            except Exception : 
-                continue
-            finally:
-                i +=1
-                if i == count:
-                    break
+        except Exception : 
+            continue
+        if i > count:
+            break
+        
+        
 
+def fetch_data(images, count):
+    count = count*2
+    i = 0
+    for image in images:
+        i +=1
+        if i%2 == 1 : 
+            continue
+        image_info = []
+        try:
+            image_info.append(image.get('alt'))
+            image_info.append(image.get('src'))
+            image_info.append(image.get('width'))
+            image_info.append(image.get('height'))
+            info.append(image_info)
+        except Exception:
+            continue
+        if i > count:
+            break
+        
+        
+    # print(info)
 
 
 with requests.Session() as session:
@@ -47,4 +72,6 @@ with requests.Session() as session:
     
     images = soup.find_all('img')
 
-    download_images(images,10)
+    # download_images(images,10)
+    fetch_data(images,10 )
+    # write_info_csv(info)
