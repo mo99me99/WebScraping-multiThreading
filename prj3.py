@@ -2,6 +2,8 @@ import requests
 import os.path
 from bs4 import BeautifulSoup
 import csv
+import threading
+import time
 
 save_dir = './images/'
 if not os.path.exists(save_dir):
@@ -35,7 +37,7 @@ def download_images(images, count) :
             # print(f"Image downloaded: {image_filename}")
 
         except Exception : 
-            continue
+            pass
         if i > count:
             break
         
@@ -56,7 +58,7 @@ def fetch_data(images, count):
             image_info.append(image.get('height'))
             info.append(image_info)
         except Exception:
-            continue
+            pass
         if i > count:
             break
         
@@ -83,6 +85,27 @@ with requests.Session() as session:
     
     images = soup.find_all('img')
 
-    # download_images(images,10)
+    s_time = time.time()
+    download_images(images,10)
     fetch_data(images,10 )
-    # write_info_csv(info)
+    f_time = time.time()
+
+    total_time = f_time - s_time
+    print(f'Total Time (Serial Implementation): {total_time} ')
+
+    t1 = threading.Thread(target=download_images, args=(images, 10))
+    t2 = threading.Thread(target=fetch_data, args=(images, 10))
+    
+    s_time = time.time()
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+    f_time = time.time()
+    
+    total_time = f_time - s_time
+    print(f'Total Time (Multithreaded Implementation): {total_time} ')
+
+
+    write_info_csv(info)
+    
