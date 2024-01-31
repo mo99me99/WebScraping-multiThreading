@@ -63,6 +63,17 @@ def fetch_data(images, count):
         
     # print(info)
 
+            
+def write_info_csv(info):
+    columns = ['id', 'alt', 'src','width', 'height' ]
+
+    with open('info.csv', mode='w', newline='') as info_file:
+        csv_writer = csv.writer(info_file)
+        csv_writer.writerow(columns)
+
+        for id, arr in enumerate(info):
+            csv_writer.writerow([id]+ arr)
+
 
 with requests.Session() as session:
     response = session.get(url, headers=headers)
